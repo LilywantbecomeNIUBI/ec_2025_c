@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environment
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+
+# Runtime outputs
+outputs/*
+!outputs/.gitkeep
+
+# Images generated during testing
+outputs/*.jpg
+outputs/*.jpeg
+outputs/*.png
+
+# Models and engines
+*.engine
+*.onnx
+*.pt
+*.pth
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+
