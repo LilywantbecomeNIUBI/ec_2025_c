@@ -64,6 +64,16 @@ DEFAULT_VISION_CONFIG = {
 }
 
 
+DEFAULT_WEB_CONFIG = {
+    "host": "0.0.0.0",
+    "port": 8000,
+    "preview_fps": 10.0,
+    "jpeg_quality": 80,
+    "stream_wait_timeout_s": 1.0,
+    "snapshot_output_dir": "outputs/web_captures",
+}
+
+
 def get_camera_config(overrides=None):
     """返回经过校验的摄像头配置副本。
 
@@ -155,4 +165,38 @@ def get_vision_config(overrides=None):
         raise ValueError("invalid shape area ratio range")
     if not 0 <= shape["min_confidence"] <= 1:
         raise ValueError("shape.min_confidence must be between 0 and 1")
+    return config
+
+
+def get_web_config(overrides=None):
+    """返回经过校验的浏览器预览配置副本。"""
+    config = dict(DEFAULT_WEB_CONFIG)
+    if overrides:
+        unknown_keys = sorted(set(overrides) - set(config))
+        if unknown_keys:
+            raise ValueError("Unknown web config keys: {}".format(
+                ", ".join(unknown_keys)))
+        config.update(overrides)
+
+    if not isinstance(config["host"], str) or not config["host"].strip():
+        raise ValueError("web host must be a non-empty string")
+    port = config["port"]
+    if isinstance(port, bool) or not isinstance(port, int) or not 1 <= port <= 65535:
+        raise ValueError("web port must be between 1 and 65535")
+    preview_fps = config["preview_fps"]
+    if (isinstance(preview_fps, bool) or
+            not isinstance(preview_fps, (int, float)) or
+            not 0 < preview_fps <= 30):
+        raise ValueError("preview_fps must be between 0 and 30")
+    jpeg_quality = config["jpeg_quality"]
+    if (isinstance(jpeg_quality, bool) or not isinstance(jpeg_quality, int) or
+            not 30 <= jpeg_quality <= 95):
+        raise ValueError("jpeg_quality must be between 30 and 95")
+    wait_timeout = config["stream_wait_timeout_s"]
+    if (isinstance(wait_timeout, bool) or
+            not isinstance(wait_timeout, (int, float)) or wait_timeout <= 0):
+        raise ValueError("stream_wait_timeout_s must be positive")
+    output_dir = config["snapshot_output_dir"]
+    if not isinstance(output_dir, str) or not output_dir.strip():
+        raise ValueError("snapshot_output_dir must be a non-empty string")
     return config

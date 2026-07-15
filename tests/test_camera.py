@@ -2,7 +2,7 @@
 
 import unittest
 
-from config import get_camera_config
+from config import get_camera_config, get_web_config
 from src.camera import CameraError, CameraReader
 
 
@@ -137,6 +137,14 @@ class CameraConfigTest(unittest.TestCase):
     def test_invalid_dimensions_are_rejected(self):
         with self.assertRaises(ValueError):
             get_camera_config({"width": 0})
+
+    def test_web_config_rejects_unsafe_ranges(self):
+        with self.assertRaises(ValueError):
+            get_web_config({"port": 0})
+        with self.assertRaises(ValueError):
+            get_web_config({"preview_fps": 31.0})
+        with self.assertRaises(ValueError):
+            get_web_config({"jpeg_quality": 100})
 
 
 if __name__ == "__main__":

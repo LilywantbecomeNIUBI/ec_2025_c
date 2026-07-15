@@ -26,9 +26,10 @@ Windows 与 Jetson Nano 的依赖分别记录在 `requirements-windows.txt` 和
 
 ## 当前实现状态
 
-阶段 3 已建立摄像头基础链路、静态原图采集、A4 黑框内侧四角检测、透视
-矫正，以及圆形、正方形和等边三角形分类。当前尚未实现相机标定、距离 `D`、
-实际尺寸 `x`、多帧稳定测量和 Web 显示，因此这些字段仍返回 `null`。
+当前已建立摄像头基础链路、静态原图采集、A4 黑框内侧四角检测、透视
+矫正、三种基本形状分类，以及 Nano 本地计算的浏览器 MJPEG 实时预览。
+当前尚未实现相机标定、距离 `D`、实际尺寸 `x` 和多帧稳定测量，因此这些
+字段仍返回 `null`。
 
 ## Windows 无硬件测试
 
@@ -94,3 +95,45 @@ python3 scripts/detection_test.py \
 形状轮廓、最终标注图和 `result.json`。成功退出码为 `0`；检测失败会保留
 可用调试图并返回退出码 `2`。当前参数只通过合成图像测试，必须使用实际
 目标纸图片继续调参后，才能评价识别率和误差。
+
+## 浏览器实时调试预览
+
+Nano 端运行：
+
+```bash
+cd /home/liwei/projects/EC_2025_C
+source .venv/bin/activate
+python3 main.py \
+  --web \
+  --device 0 \
+  --host 0.0.0.0 \
+  --port 8000 \
+  --preview-fps 10
+```
+
+查询 Nano 局域网地址：
+
+```bash
+hostname -I
+```
+
+在同一局域网的 PC 浏览器访问：
+
+```text
+http://<NANO_IP>:8000
+```
+
+页面显示 Nano 生成的标注画面、检测状态、形状、置信度、`dx/dy`、单帧
+处理耗时和预览 FPS。浏览器断开不会关闭摄像头；所有浏览器客户端共享同一
+采集与检测线程，不会重复初始化 `/dev/video0`。
+
+“保存当前完整调试快照”按钮只在点击时把当前帧及其灰度图、二值图、角点、
+透视图、轮廓图和 JSON 写入：
+
+```text
+outputs/web_captures/<TIMESTAMP>_frame_<SEQUENCE>/
+```
+
+服务使用 Python 3.6 标准库 HTTP 和 OpenCV MJPEG，不需要安装 Flask。按
+`Ctrl+C` 停止并释放摄像头。该页面没有身份认证，只应在比赛调试局域网中
+使用，不应映射到公网。
