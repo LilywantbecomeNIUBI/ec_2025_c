@@ -41,7 +41,7 @@ python -m unittest discover -s tests -v
 `opencv-python`，也不要升级系统 NumPy：
 
 ```bash
-cd /home/liwei/projects/nano_test
+cd /home/liwei/projects/EC_2025_C
 source .venv/bin/activate
 python3 scripts/camera_test.py --frames 3
 ```

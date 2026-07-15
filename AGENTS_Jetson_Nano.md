@@ -86,25 +86,25 @@ Nano 账户：
 Nano 项目目录：
 
 ```bash
-/home/liwei/projects/nano_test
+/home/liwei/projects/EC_2025_C
 ```
 
 Windows 项目目录：
 
 ```text
-E:\Nano\nano_test
+E:\Nano\ec_2025_c
 ```
 
 GitHub 仓库：
 
 ```text
-https://github.com/LilywantbecomeNIUBI/nano_test
+https://github.com/LilywantbecomeNIUBI/ec_2025_c
 ```
 
 Nano 端远程仓库使用 SSH：
 
 ```text
-git@github.com:LilywantbecomeNIUBI/nano_test.git
+git@github.com:LilywantbecomeNIUBI/ec_2025_c.git
 ```
 
 ## 5. Python 运行规则
@@ -150,7 +150,7 @@ def open_camera(device_id=0):
 项目已有虚拟环境：
 
 ```bash
-/home/liwei/projects/nano_test/.venv
+/home/liwei/projects/EC_2025_C/.venv
 ```
 
 创建方式：
@@ -162,7 +162,7 @@ python3 -m venv .venv --system-site-packages
 运行项目前优先：
 
 ```bash
-cd /home/liwei/projects/nano_test
+cd /home/liwei/projects/EC_2025_C
 source .venv/bin/activate
 python3 script.py
 ```
@@ -395,7 +395,7 @@ git push
 Nano 端负责实机测试：
 
 ```bash
-cd /home/liwei/projects/nano_test
+cd /home/liwei/projects/EC_2025_C
 git pull
 source .venv/bin/activate
 python3 script.py
