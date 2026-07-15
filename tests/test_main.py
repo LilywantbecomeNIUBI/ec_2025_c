@@ -5,12 +5,10 @@ import json
 import unittest
 from contextlib import redirect_stdout
 
+import numpy as np
+
 from config import get_camera_config
 from main import run_camera_check
-
-
-class FakeFrame(object):
-    shape = (480, 640, 3)
 
 
 class FakeCapture(object):
@@ -29,7 +27,8 @@ class FakeCapture(object):
         return self.properties.get(property_id, 0.0)
 
     def read(self):
-        return True, FakeFrame()
+        frame = np.full((480, 640, 3), 180, dtype=np.uint8)
+        return True, frame
 
     def release(self):
         self.released = True
@@ -54,8 +53,8 @@ class CameraEntryIntegrationTest(unittest.TestCase):
         opened_event = json.loads(lines[0])
         frame_result = json.loads(lines[-1])
         self.assertEqual(opened_event["event"], "camera_opened")
-        self.assertEqual(frame_result["status"], "frame_ready")
-        self.assertEqual(results[0]["status"], "frame_ready")
+        self.assertEqual(frame_result["status"], "board_not_found")
+        self.assertEqual(results[0]["status"], "board_not_found")
         self.assertTrue(capture.released)
 
 

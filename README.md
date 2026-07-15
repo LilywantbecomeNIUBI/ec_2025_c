@@ -7,7 +7,10 @@
 - `main.py`：主程序入口
 - `config.py`：摄像头参数、识别阈值和尺寸参数
 - `src/camera.py`：摄像头采集
-- `src/detection.py`：目标识别
+- `src/board_detector.py`：A4 黑框内侧四角检测
+- `src/geometry.py`：角点排序和透视变换
+- `src/shape_detector.py`：圆形、正方形和等边三角形识别
+- `src/detection.py`：组合单帧检测流程
 - `src/measurement.py`：距离、尺寸等测量
 - `src/calibration.py`：相机标定
 - `src/visualization.py`：结果可视化
@@ -23,15 +26,18 @@ Windows 与 Jetson Nano 的依赖分别记录在 `requirements-windows.txt` 和
 
 ## 当前实现状态
 
-阶段 2A 已建立摄像头基础链路：集中配置、打开、参数请求、预热、逐帧读取、
-连续失败重连、资源释放和统一帧结果。当前尚未实现 A4 目标纸、形状、距离、
-尺寸和 Web 检测；`frame_ready` 只表示摄像头帧有效。
+阶段 3 已建立摄像头基础链路、静态原图采集、A4 黑框内侧四角检测、透视
+矫正，以及圆形、正方形和等边三角形分类。当前尚未实现相机标定、距离 `D`、
+实际尺寸 `x`、多帧稳定测量和 Web 显示，因此这些字段仍返回 `null`。
 
 ## Windows 无硬件测试
 
-测试只使用 Python 标准库和模拟摄像头，不需要安装 OpenCV：
+首次创建独立 Windows 开发环境并安装 Windows 专用依赖：
 
 ```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements-windows.txt
 python -m unittest discover -s tests -v
 ```
 
@@ -47,10 +53,11 @@ python3 scripts/camera_test.py --frames 3
 ```
 
 程序默认打开 `/dev/video0` 对应的设备索引 `0`，请求 `640x480 @ 30 FPS`，
-丢弃 30 帧后输出三条 `frame_ready` JSON 结果。也可以显式指定设备：
+丢弃 30 帧后对三帧图像执行目标检测。也可以显式指定设备编号；推荐传整数
+`0`，避免旧版 OpenCV 把 `/dev/video0` 字符串优先交给 GStreamer：
 
 ```bash
-python3 scripts/camera_test.py --device /dev/video0 --frames 3
+python3 scripts/camera_test.py --device 0 --frames 3
 ```
 
 此命令需要 Nano、USB 摄像头和实机 OpenCV；不会修改系统环境，也不会保存
@@ -61,3 +68,29 @@ ls -l /dev/video0
 v4l2-ctl --device=/dev/video0 --list-formats-ext
 python3 -c "import cv2; print(cv2.__version__)"
 ```
+
+## Nano 静态目标图片采集
+
+以下命令预热摄像头，等待 2 秒后保存一张原始图片，并把元数据追加到
+`captures.jsonl`。所有文件均写入已被 Git 忽略的 `outputs/`：
+
+```bash
+python3 scripts/capture_target_image.py \
+  --shape circle \
+  --size-cm 13 \
+  --distance-cm 150 \
+  --count 1
+```
+
+## 静态图片检测
+
+```bash
+python3 scripts/detection_test.py \
+  --input outputs/static_targets/<IMAGE_NAME>.jpg \
+  --output outputs/detection_result
+```
+
+输出目录包括原图、灰度图、二值图、边缘图、候选四边形、目标纸角点、透视矫正图、
+形状轮廓、最终标注图和 `result.json`。成功退出码为 `0`；检测失败会保留
+可用调试图并返回退出码 `2`。当前参数只通过合成图像测试，必须使用实际
+目标纸图片继续调参后，才能评价识别率和误差。

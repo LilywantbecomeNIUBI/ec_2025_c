@@ -1,2 +1,3 @@
-# Windows 开发环境依赖将在方案确定后添加。
-
+# Windows-only algorithm development dependencies. Do not install on Nano.
+numpy==1.26.4
+opencv-python==4.10.0.84
